@@ -1,0 +1,38 @@
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKDescriptorSet.mm b/MoltenVK/MoltenVK/GPUObjects/MVKDescriptorSet.mm
+index 987cc35..8a7b22c 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKDescriptorSet.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKDescriptorSet.mm
+@@ -2459,11 +2459,28 @@ static uint32_t calcGroupSizeWithPadding(uint32_t size, uint32_t groups, uint32_
+ }
+ 
+ MVKDescriptorPool::~MVKDescriptorPool() {
+-	if (_hasAccelerationStructureDescriptors) {
+-		for (uint32_t i = 0; i < _numAllocatedDescriptorSets; i++) {
+-			mvkReleaseDescriptorSetAccelerationStructures(&_descriptorSets[i].allocated);
+-		}
+-	}
++	// Deliberately does NOT walk the descriptor sets to release acceleration
++	// structure references.
++	//
++	// mvkReleaseDescriptorSetAccelerationStructures() reaches the lock through
++	// set->layout->getDevice(), but MVKDescriptorSet::layout is a raw pointer and
++	// the Vulkan spec permits a VkDescriptorSetLayout to be destroyed while
++	// descriptor sets allocated from it are still alive - those sets remain valid.
++	// An application that destroys its layouts before destroying the pool therefore
++	// leaves set->layout dangling here, and the resulting garbage mutex reference
++	// aborts the process:
++	//
++	//     libc++abi: terminating due to uncaught exception of type
++	//     std::__1::system_error: mutex lock failed: Invalid argument
++	//
++	// The null guard inside that function cannot catch this: a dangling pointer is
++	// not null, and freed entries are only safe because freeDescriptorSets() nulls
++	// cpuBuffer first.
++	//
++	// Skipping the release here is safe: the pool and every set in it are going
++	// away, and the acceleration structures are owned by the device, which tears
++	// down its own objects. reset() and freeDescriptorSets() keep the release,
++	// because there the layouts are still live and the sets outlive the call.
+ 	[_gpuBufferObject release];
+ }
+ 

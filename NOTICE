@@ -1,0 +1,64 @@
+MoltenVK — binary redistribution
+================================
+
+This repository redistributes a compiled build of MoltenVK.
+
+MoltenVK
+Copyright (c) 2015-2026 The Brenwill Workshop Ltd.
+https://github.com/KhronosGroup/MoltenVK
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+these files except in compliance with the License. A copy of the License is
+included in this repository as LICENSE, and may also be obtained at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+
+Statement of modification (Apache-2.0 section 4(b))
+---------------------------------------------------
+
+The binary in this repository is NOT built from unmodified upstream MoltenVK.
+
+It is built from a fork carrying changes proposed in MoltenVK pull request #2771,
+which adds support for the VK_KHR_ray_query extension. That pull request had not
+been merged into upstream MoltenVK at the time this binary was produced.
+
+    Upstream project   https://github.com/KhronosGroup/MoltenVK
+    Pull request       https://github.com/KhronosGroup/MoltenVK/pull/2771
+    Source fork        https://github.com/dttdrv/MoltenVK
+    Source branch      macgaming/ray-query-pr
+
+One additional local change was made to the MoltenVK sources: a fix to
+MVKDescriptorPool's destructor, which dereferenced a descriptor set layout pointer
+that the Vulkan specification permits an application to have already destroyed.
+The change is reproduced in full in:
+
+    patches/0001-fix-descriptor-pool-destructor-dangling-layout.patch
+
+No other modifications were made.
+
+
+Third-party components
+----------------------
+
+MoltenVK's build incorporates or references the projects listed below. Their
+license texts are reproduced in the third-party/ directory of this repository.
+The authoritative and current list of pinned dependencies is maintained upstream
+in MoltenVK's ExternalRevisions/ directory.
+
+    SPIRV-Cross      Apache-2.0     https://github.com/KhronosGroup/SPIRV-Cross
+    SPIRV-Tools      Apache-2.0     https://github.com/KhronosGroup/SPIRV-Tools
+    SPIRV-Headers    MIT            https://github.com/KhronosGroup/SPIRV-Headers
+    Vulkan-Headers   Apache-2.0     https://github.com/KhronosGroup/Vulkan-Headers
+    Vulkan-Tools     Apache-2.0     https://github.com/KhronosGroup/Vulkan-Tools
+    Volk             MIT            https://github.com/zeux/volk
+    cereal           BSD-3-Clause   https://github.com/USCiLab/cereal
+
+Vulkan and the Vulkan logo are registered trademarks of the Khronos Group Inc.
+Metal and macOS are trademarks of Apple Inc. Use of these names is for
+identification only and does not imply endorsement.
